@@ -8,23 +8,33 @@ const statusText = document.getElementById('status');
 const goalInput = document.getElementById('goalInput');
 const timerDisplay = document.getElementById('timer');
 const progressBar = document.getElementById('progressBar');
-const mainCard = document.getElementById('mainCard');
+const modeBtns = document.querySelectorAll('.mode-btn');
 
 function updateUI() {
-    // Actualizar texto del reloj
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
     timerDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
-    // Actualizar barra de progreso
     const percentage = (timeLeft / totalTime) * 100;
     progressBar.style.width = `${percentage}%`;
 }
 
+// Selección de modo
+modeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (timerId) return; // Bloquear cambio si está corriendo
+        
+        modeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const minutes = parseInt(btn.dataset.time);
+        totalTime = minutes * 60;
+        timeLeft = totalTime;
+        updateUI();
+    });
+});
+
 function startTimer() {
     if (timerId !== null) return;
-    
-    mainCard.classList.add('active');
     
     timerId = setInterval(() => {
         timeLeft--;
@@ -33,24 +43,19 @@ function startTimer() {
         if (timeLeft <= 0) {
             clearInterval(timerId);
             timerId = null;
-            mainCard.classList.remove('active');
-            statusText.innerText = "Objetivo completado con éxito.";
-            statusText.style.color = "#d4af37";
+            new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play().catch(() => {});
+            statusText.innerText = "Ciclo terminado. Evalúa tus resultados.";
         }
     }, 1000);
 }
 
 mainButton.addEventListener('click', () => {
     const goal = goalInput.value.trim();
-    
-    if (goal === "") {
-        statusText.innerText = "La claridad es poder. Define un objetivo.";
-        statusText.style.color = "#ff4757";
+    if (!goal) {
+        statusText.innerText = "Sin objetivo no hay camino. Escribe algo.";
         return;
     }
-
-    statusText.innerText = `En curso: ${goal}`;
-    statusText.style.color = "#d4af37";
+    statusText.innerText = `Enfoque: ${goal}`;
     goalInput.disabled = true;
     mainButton.disabled = true;
     startTimer();
@@ -61,11 +66,7 @@ resetButton.addEventListener('click', () => {
     timerId = null;
     timeLeft = totalTime;
     updateUI();
-    
-    mainCard.classList.remove('active');
-    statusText.innerText = "Sistema listo para nueva misión.";
-    statusText.style.color = "#888";
+    statusText.innerText = "Sistema reiniciado.";
     goalInput.disabled = false;
-    goalInput.value = "";
     mainButton.disabled = false;
 });
