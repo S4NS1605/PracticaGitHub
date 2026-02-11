@@ -3,11 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Enfoque Estratégico</title>
+    <title>Focus Mentor | Sistema de Alto Rendimiento</title>
     <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
     <div class="container">
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-label">Tiempo Total</span>
+                <span id="totalFocusTime" class="stat-value">0 min</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Sesiones</span>
+                <span id="totalSessions" class="stat-value">0</span>
+            </div>
+        </div>
+
         <div class="card" id="mainCard">
             <div class="progress-container">
                 <div class="progress-bar" id="progressBar"></div>
@@ -24,22 +37,26 @@
             <div class="timer-display" id="timer">25:00</div>
             
             <div class="input-group">
-                <input type="text" id="goalInput" placeholder="¿En qué invertirás tu energía?">
+                <input type="text" id="goalInput" placeholder="Define tu intención estratégica...">
             </div>
 
-            <p id="status">Estado: Esperando intención...</p>
+            <p id="status">Estado: Preparado para la ejecución</p>
             
             <div class="button-group">
-                <button id="mainButton">Ejecutar</button>
+                <button id="mainButton">Iniciar Misión</button>
                 <button id="resetButton" class="secondary">Reset</button>
             </div>
         </div>
 
         <div class="log-container">
-            <h3>Registro de Victorias y Feedback</h3>
+            <div class="log-header">
+                <h3>Registro de Victorias</h3>
+                <button id="clearLog" class="text-btn">Limpiar Historial</button>
+            </div>
             <ul id="sessionLog"></ul>
         </div>
     </div>
+
     <audio id="soundSuccess" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
     <audio id="soundFail" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
     

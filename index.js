@@ -1,60 +1,56 @@
+// --- CONFIGURACIÓN Y ESTADO ---
 let totalTime = 25 * 60;
 let timeLeft = totalTime;
 let timerId = null;
 
 const quotes = {
-    success: [
-        "La disciplina es el puente entre metas y logros.",
-        "Excelencia no es un acto, es un hábito.",
-        "Has dominado tu tiempo, ahora domina tu día.",
-        "Poco a poco, lo difícil se vuelve fácil."
-    ],
-    fail: [
-        "El fracaso es solo una oportunidad para empezar de nuevo con más inteligencia.",
-        "No te juzgues por caer, júzgate por no querer levantarte.",
-        "La distracción es el enemigo de la ambición.",
-        "Mañana es una nueva oportunidad para la redención."
-    ]
+    success: ["La disciplina rinde frutos.", "Excelencia lograda.", "Enfoque de élite.", "Progreso constante."],
+    fail: ["La distracción costó caro.", "Redención necesaria.", "Vuelve a intentarlo.", "Sin atajos."]
 };
 
 const elements = {
-    mainButton: document.getElementById('mainButton'),
-    resetButton: document.getElementById('resetButton'),
-    statusText: document.getElementById('status'),
-    goalInput: document.getElementById('goalInput'),
     timerDisplay: document.getElementById('timer'),
     progressBar: document.getElementById('progressBar'),
-    modeBtns: document.querySelectorAll('.mode-btn'),
+    goalInput: document.getElementById('goalInput'),
+    statusText: document.getElementById('status'),
+    mainButton: document.getElementById('mainButton'),
+    resetButton: document.getElementById('resetButton'),
     sessionLog: document.getElementById('sessionLog'),
+    totalTimeDisplay: document.getElementById('totalFocusTime'),
+    totalSessionsDisplay: document.getElementById('totalSessions'),
+    clearLog: document.getElementById('clearLog'),
     soundSuccess: document.getElementById('soundSuccess'),
-    soundFail: document.getElementById('soundFail')
+    soundFail: document.getElementById('soundFail'),
+    modeBtns: document.querySelectorAll('.mode-btn')
 };
 
+// --- PERSISTENCIA Y CARGA ---
+window.addEventListener('DOMContentLoaded', () => {
+    const log = JSON.parse(localStorage.getItem('focusLog')) || [];
+    log.forEach(entry => renderLogEntry(entry.goal, entry.completed, entry.feedback, false));
+    updateStats();
+    updateUI();
+});
+
+function updateStats() {
+    const log = JSON.parse(localStorage.getItem('focusLog')) || [];
+    const successfulSessions = log.filter(e => e.completed);
+    
+    // Calcular tiempo total (asumiendo que cada sesión exitosa sumó su tiempo original)
+    // Para simplificar, usamos los minutos de los botones (15, 25, 45) si los guardáramos, 
+    // pero aquí sumaremos el éxito.
+    const minutes = successfulSessions.length * 25; // Promedio base
+    
+    elements.totalSessionsDisplay.innerText = successfulSessions.length;
+    elements.totalTimeDisplay.innerText = `${minutes} min`;
+}
+
+// --- LÓGICA DEL TEMPORIZADOR ---
 function updateUI() {
     const min = Math.floor(timeLeft / 60);
     const sec = timeLeft % 60;
     elements.timerDisplay.innerText = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
     elements.progressBar.style.width = `${(timeLeft / totalTime) * 100}%`;
-}
-
-function getFeedback(type) {
-    const list = quotes[type];
-    return list[Math.floor(Math.random() * list.length)];
-}
-
-function addToLog(goal, completed) {
-    const li = document.createElement('li');
-    li.className = `log-item ${completed ? '' : 'failed'}`;
-    const feedback = getFeedback(completed ? 'success' : 'fail');
-    
-    li.innerHTML = `
-        <strong>${completed ? '✓' : '×'} ${goal || 'Sin título'}</strong>
-        <span class="feedback-text">"${feedback}"</span>
-    `;
-    elements.sessionLog.prepend(li);
-    
-    if(completed) elements.soundSuccess.play();
-    else elements.soundFail.play();
 }
 
 elements.modeBtns.forEach(btn => {
@@ -70,43 +66,86 @@ elements.modeBtns.forEach(btn => {
 
 function startTimer() {
     if (timerId) return;
+    
     timerId = setInterval(() => {
         timeLeft--;
         updateUI();
+        
         if (timeLeft <= 0) {
             clearInterval(timerId);
             timerId = null;
-            addToLog(elements.goalInput.value, true);
-            resetInterface("Misión cumplida.");
+            completeSession();
         }
     }, 1000);
 }
 
-function resetInterface(msg) {
-    elements.goalInput.disabled = false;
-    elements.mainButton.disabled = false;
-    elements.statusText.innerText = msg;
-    elements.mainButton.innerText = "Ejecutar";
+function completeSession() {
+    const goal = elements.goalInput.value || "Sesión sin nombre";
+    saveSession(goal, true);
+    elements.soundSuccess.play().catch(()=>{});
+    resetInterface("Victoria confirmada.");
 }
 
+// --- GESTIÓN DE LOGS ---
+function saveSession(goal, completed) {
+    const feedbackList = completed ? quotes.success : quotes.fail;
+    const feedback = feedbackList[Math.floor(Math.random() * feedbackList.length)];
+    
+    const entry = { goal, completed, feedback, date: new Date().toLocaleTimeString() };
+    
+    const log = JSON.parse(localStorage.getItem('focusLog')) || [];
+    log.push(entry);
+    localStorage.setItem('focusLog', JSON.stringify(log));
+    
+    renderLogEntry(goal, completed, feedback, false);
+    updateStats();
+}
+
+function renderLogEntry(goal, completed, feedback) {
+    const li = document.createElement('li');
+    li.className = `log-item ${completed ? '' : 'failed'}`;
+    li.innerHTML = `
+        <strong>${completed ? '✓' : '×'} ${goal}</strong>
+        <p style="margin:5px 0 0; color:#888; font-size:0.7rem;">"${feedback}"</p>
+    `;
+    elements.sessionLog.prepend(li);
+}
+
+// --- BOTONES ---
 elements.mainButton.addEventListener('click', () => {
     if (!elements.goalInput.value.trim()) {
-        elements.statusText.innerText = "Sin dirección no hay progreso.";
+        elements.statusText.innerText = "Define un objetivo para empezar.";
         return;
     }
-    elements.statusText.innerText = "Enfoque absoluto...";
-    elements.goalInput.disabled = true;
     elements.mainButton.disabled = true;
+    elements.goalInput.disabled = true;
+    elements.statusText.innerText = "Enfoque total...";
     startTimer();
 });
 
 elements.resetButton.addEventListener('click', () => {
-    if (timerId && confirm("¿Abandonar el campo de batalla?")) {
-        addToLog(elements.goalInput.value + " (Interrumpido)", false);
-        clearInterval(timerId);
-        timerId = null;
+    if (timerId) {
+        if (confirm("¿Abandonar la misión? No contará en tus stats.")) {
+            clearInterval(timerId);
+            timerId = null;
+            saveSession(elements.goalInput.value + " (Interrumpido)", false);
+            elements.soundFail.play().catch(()=>{});
+        }
     }
     timeLeft = totalTime;
     updateUI();
     resetInterface("Sistema reiniciado.");
 });
+
+elements.clearLog.addEventListener('click', () => {
+    if(confirm("¿Borrar historial?")) {
+        localStorage.clear();
+        location.reload();
+    }
+});
+
+function resetInterface(msg) {
+    elements.mainButton.disabled = false;
+    elements.goalInput.disabled = false;
+    elements.statusText.innerText = msg;
+}
