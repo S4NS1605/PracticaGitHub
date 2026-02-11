@@ -1,41 +1,64 @@
-/* Estética de simplicidad y orden */
-body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f4f4f4;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
+:root {
+    --gold: #d4af37;
+    --gold-bright: #f1c40f;
+    --bg: #030303;
+    --card: #0a0a0a;
+    --border: #1a1a1a;
+    --red: #ff4757;
 }
 
-.container {
-    text-align: center;
+body {
+    margin: 0; padding: 20px; background: var(--bg); color: #fff;
+    font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
 }
+
+.container { width: 100%; max-width: 400px; animation: fadeIn 0.8s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.stats-bar {
+    display: flex; justify-content: space-around; background: var(--card);
+    padding: 15px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 20px;
+}
+.stat-label { display: block; font-size: 0.6rem; text-transform: uppercase; color: #555; letter-spacing: 1px; }
+.stat-value { font-size: 1rem; font-weight: 700; color: var(--gold); }
 
 .card {
-    background: #ffffff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    background: var(--card); padding: 2.5rem; border-radius: 35px;
+    border: 1px solid var(--border); box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+    text-align: center; position: relative; overflow: hidden;
 }
 
-h1 {
-    font-size: 1.5rem;
-    color: #333;
-    margin-bottom: 1rem;
+.progress-container { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #000; }
+.progress-bar { height: 100%; width: 100%; background: var(--gold); box-shadow: 0 0 15px var(--gold); transition: width 1s linear; }
+
+.title { font-size: 0.7rem; letter-spacing: 5px; color: #444; text-transform: uppercase; margin-bottom: 20px; }
+
+.custom-time-wrapper { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
+.custom-time-wrapper input { 
+    width: 60px; background: #000; border: 1px solid var(--border); padding: 8px;
+    border-radius: 10px; color: var(--gold); text-align: center; outline: none;
+}
+.custom-time-wrapper button {
+    background: #151515; color: #fff; font-size: 0.6rem; padding: 8px 12px;
+    border-radius: 10px; border: none; cursor: pointer; text-transform: uppercase;
 }
 
-button {
-    background-color: #000;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.3s ease;
+.ambient-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
+.ambient-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.15; transition: 0.4s; }
+.ambient-btn.active { opacity: 1; transform: scale(1.2); }
+
+.mode-selector { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; }
+.mode-btn {
+    background: #000; border: 1px solid var(--border); color: #444;
+    padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 0.7rem;
+}
+.mode-btn.active { background: var(--gold); color: #000; font-weight: 700; border: none; }
+
+.timer-display { font-size: 6rem; font-weight: 100; margin: 10px 0; letter-spacing: -4px; color: #fff; }
+
+input[type="text"] {
+    width: 100%; background: #000; border: 1px solid var(--border); padding: 16px;
+    border-radius: 15px; color: #fff; margin-bottom: 20px; text-align: center; outline: none;
 }
 
 button:hover {
