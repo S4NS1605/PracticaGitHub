@@ -6,7 +6,8 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f4f4f4;
+    background-color: #eef2f7;
+
     font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -40,4 +41,20 @@ button {
 
 button:hover {
     background-color: #333;
+    transform: scale(1.05);
 }
+.subtitle{
+    font-size:1rem;
+    color:#666;
+    margin-bottom:10px;
+}
+
+button {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+} 
