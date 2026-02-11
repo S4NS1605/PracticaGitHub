@@ -10,4 +10,11 @@ btn.addEventListener("click", ()=>{
     btn.textContent = "En progreso";
     btn.disabled = true;
 
+    mostrarHora();
 });
+
+/* función hora */
+function mostrarHora(){
+    const ahora = new Date();
+    time.textContent = "Inicio: " + ahora.toLocaleTimeString();
+}
