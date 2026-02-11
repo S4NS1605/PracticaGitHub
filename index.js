@@ -2,41 +2,65 @@ let totalTime = 25 * 60;
 let timeLeft = totalTime;
 let timerId = null;
 
-const mainButton = document.getElementById('mainButton');
-const resetButton = document.getElementById('resetButton');
-const statusText = document.getElementById('status');
-const goalInput = document.getElementById('goalInput');
-const timerDisplay = document.getElementById('timer');
-const progressBar = document.getElementById('progressBar');
-const modeBtns = document.querySelectorAll('.mode-btn');
-const sessionLog = document.getElementById('sessionLog');
+const quotes = {
+    success: [
+        "La disciplina es el puente entre metas y logros.",
+        "Excelencia no es un acto, es un hábito.",
+        "Has dominado tu tiempo, ahora domina tu día.",
+        "Poco a poco, lo difícil se vuelve fácil."
+    ],
+    fail: [
+        "El fracaso es solo una oportunidad para empezar de nuevo con más inteligencia.",
+        "No te juzgues por caer, júzgate por no querer levantarte.",
+        "La distracción es el enemigo de la ambición.",
+        "Mañana es una nueva oportunidad para la redención."
+    ]
+};
+
+const elements = {
+    mainButton: document.getElementById('mainButton'),
+    resetButton: document.getElementById('resetButton'),
+    statusText: document.getElementById('status'),
+    goalInput: document.getElementById('goalInput'),
+    timerDisplay: document.getElementById('timer'),
+    progressBar: document.getElementById('progressBar'),
+    modeBtns: document.querySelectorAll('.mode-btn'),
+    sessionLog: document.getElementById('sessionLog'),
+    soundSuccess: document.getElementById('soundSuccess'),
+    soundFail: document.getElementById('soundFail')
+};
 
 function updateUI() {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    timerDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    const percentage = (timeLeft / totalTime) * 100;
-    progressBar.style.width = `${percentage}%`;
+    const min = Math.floor(timeLeft / 60);
+    const sec = timeLeft % 60;
+    elements.timerDisplay.innerText = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    elements.progressBar.style.width = `${(timeLeft / totalTime) * 100}%`;
 }
 
-function addToLog(goal, completed = true) {
-    const now = new Date();
-    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    
+function getFeedback(type) {
+    const list = quotes[type];
+    return list[Math.floor(Math.random() * list.length)];
+}
+
+function addToLog(goal, completed) {
     const li = document.createElement('li');
-    li.className = 'log-item';
-    li.innerHTML = `
-        <span>${goal || "Sin nombre"}</span>
-        <span class="log-time">${completed ? '✓' : '×'} ${timeStr}</span>
-    `;
+    li.className = `log-item ${completed ? '' : 'failed'}`;
+    const feedback = getFeedback(completed ? 'success' : 'fail');
     
-    sessionLog.prepend(li); // Añadir al inicio de la lista
+    li.innerHTML = `
+        <strong>${completed ? '✓' : '×'} ${goal || 'Sin título'}</strong>
+        <span class="feedback-text">"${feedback}"</span>
+    `;
+    elements.sessionLog.prepend(li);
+    
+    if(completed) elements.soundSuccess.play();
+    else elements.soundFail.play();
 }
 
-modeBtns.forEach(btn => {
+elements.modeBtns.forEach(btn => {
     btn.addEventListener('click', () => {
         if (timerId) return;
-        modeBtns.forEach(b => b.classList.remove('active'));
+        elements.modeBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         totalTime = parseInt(btn.dataset.time) * 60;
         timeLeft = totalTime;
@@ -45,54 +69,44 @@ modeBtns.forEach(btn => {
 });
 
 function startTimer() {
-    if (timerId !== null) return;
-    
+    if (timerId) return;
     timerId = setInterval(() => {
         timeLeft--;
         updateUI();
-        
         if (timeLeft <= 0) {
             clearInterval(timerId);
             timerId = null;
-            addToLog(goalInput.value, true);
-            statusText.innerText = "Victoria confirmada.";
-            resetInterface();
+            addToLog(elements.goalInput.value, true);
+            resetInterface("Misión cumplida.");
         }
     }, 1000);
 }
 
-function resetInterface() {
-    goalInput.disabled = false;
-    mainButton.disabled = false;
-    mainButton.innerText = "Iniciar";
+function resetInterface(msg) {
+    elements.goalInput.disabled = false;
+    elements.mainButton.disabled = false;
+    elements.statusText.innerText = msg;
+    elements.mainButton.innerText = "Ejecutar";
 }
 
-mainButton.addEventListener('click', () => {
-    const goal = goalInput.value.trim();
-    if (!goal) {
-        statusText.innerText = "Define tu objetivo primero.";
+elements.mainButton.addEventListener('click', () => {
+    if (!elements.goalInput.value.trim()) {
+        elements.statusText.innerText = "Sin dirección no hay progreso.";
         return;
     }
-    statusText.innerText = "Enfoque total activado.";
-    goalInput.disabled = true;
-    mainButton.disabled = true;
+    elements.statusText.innerText = "Enfoque absoluto...";
+    elements.goalInput.disabled = true;
+    elements.mainButton.disabled = true;
     startTimer();
 });
 
-resetButton.addEventListener('click', () => {
-    if (timerId) {
-        if(confirm("¿Rendirse? Esta sesión no contará en tu registro.")) {
-            addToLog(goalInput.value + " (Cancelado)", false);
-            clearInterval(timerId);
-            timerId = null;
-            timeLeft = totalTime;
-            updateUI();
-            resetInterface();
-            statusText.innerText = "Sesión abortada.";
-        }
-    } else {
-        timeLeft = totalTime;
-        updateUI();
-        statusText.innerText = "Listo para comenzar.";
+elements.resetButton.addEventListener('click', () => {
+    if (timerId && confirm("¿Abandonar el campo de batalla?")) {
+        addToLog(elements.goalInput.value + " (Interrumpido)", false);
+        clearInterval(timerId);
+        timerId = null;
     }
+    timeLeft = totalTime;
+    updateUI();
+    resetInterface("Sistema reiniciado.");
 });

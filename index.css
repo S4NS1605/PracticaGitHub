@@ -1,11 +1,11 @@
-/* V6: Añadiendo el Log de Sesiones y Ajustes de Layout */
+/* V7: Refinamiento de Feedback y Mensajería */
 body {
     margin: 0;
     background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
     color: #e0e0e0;
     font-family: 'Inter', sans-serif;
     display: flex;
-    flex-direction: column; /* Cambiado para permitir el log debajo */
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
@@ -13,81 +13,81 @@ body {
 }
 
 .card {
-    background: rgba(25, 25, 25, 0.8);
-    backdrop-filter: blur(15px);
+    background: rgba(25, 25, 25, 0.9);
+    backdrop-filter: blur(20px);
     padding: 2.5rem;
-    border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-    width: 380px;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+    width: 400px;
     text-align: center;
     position: relative;
     overflow: hidden;
-    z-index: 2;
 }
 
-/* Estilos del Log de Sesiones */
-.log-container {
-    margin-top: 2rem;
-    width: 380px;
-    animation: fadeIn 0.8s ease;
-}
-
-.log-container h3 {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+.mode-btn {
+    background: #1a1a1a;
+    border: 1px solid #333;
     color: #555;
-    margin-bottom: 1rem;
-    text-align: center;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#sessionLog {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.mode-btn.active {
+    background: #d4af37;
+    color: #000;
+    border-color: #d4af37;
+    font-weight: 800;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+.timer-display {
+    font-size: 5.5rem;
+    font-weight: 100;
+    color: #fff;
+    margin: 1rem 0;
+    letter-spacing: -2px;
 }
 
 .log-item {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 12px 16px;
-    border-radius: 10px;
-    margin-bottom: 8px;
-    font-size: 0.85rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #bbb;
-    transition: all 0.3s ease;
+    background: rgba(20, 20, 20, 0.4);
+    border-left: 3px solid #d4af37;
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 0 12px 12px 0;
+    font-size: 0.8rem;
+    animation: slideIn 0.5s ease;
 }
 
-.log-item:hover {
-    background: rgba(212, 175, 55, 0.05);
-    color: #fff;
+.log-item.failed {
+    border-left-color: #ff4757;
+    opacity: 0.7;
 }
 
-.log-time {
-    font-size: 0.7rem;
-    color: #d4af37;
-    font-family: monospace;
+.feedback-text {
+    display: block;
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+    font-size: 0.75rem;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
 }
 
-/* (Mantener el resto de los estilos de la V5) */
-.mode-selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 1.5rem; }
-.mode-btn { background: #222; border: 1px solid #333; color: #666; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: all 0.3s ease; }
-.mode-btn.active { background: #d4af37; color: #000; border-color: #d4af37; font-weight: bold; }
-.progress-container { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: rgba(255, 255, 255, 0.05); }
-.progress-bar { height: 100%; width: 100%; background: linear-gradient(90deg, #d4af37, #f1c40f); transition: width 1s linear; }
-h1 { font-weight: 300; font-size: 0.8rem; letter-spacing: 4px; margin: 0.5rem 0 1.5rem; color: #555; text-transform: uppercase; }
-.timer-display { font-size: 5rem; font-weight: 100; color: #fff; margin-bottom: 1rem; font-variant-numeric: tabular-nums; }
-input { width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid #333; padding: 14px; border-radius: 12px; color: #fff; margin-bottom: 1rem; outline: none; box-sizing: border-box; }
-.button-group { display: flex; gap: 12px; }
-button:not(.mode-btn) { flex: 2; background: #d4af37; color: #000; font-weight: 700; border: none; padding: 16px; border-radius: 12px; cursor: pointer; text-transform: uppercase; transition: all 0.3s ease; }
-button.secondary { flex: 1; background: transparent; border: 1px solid #333; color: #888; }
-#status { font-size: 0.8rem; margin-bottom: 1.5rem; color: #aaa; }
+/* Reutilización de estilos previos para mantener consistencia */
+.progress-container { position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: rgba(255,255,255,0.03); }
+.progress-bar { height: 100%; width: 100%; background: #d4af37; transition: width 1s linear; }
+h1 { font-size: 0.75rem; letter-spacing: 5px; color: #444; text-transform: uppercase; margin-bottom: 1.5rem; }
+input { width: 100%; background: #111; border: 1px solid #222; padding: 15px; border-radius: 12px; color: #fff; margin-bottom: 1rem; }
+.button-group { display: flex; gap: 10px; }
+button:not(.mode-btn) { flex: 2; background: #d4af37; color: #000; font-weight: 700; border: none; padding: 16px; border-radius: 12px; cursor: pointer; text-transform: uppercase; }
+button.secondary { flex: 1; background: transparent; border: 1px solid #333; color: #666; }
+.log-container { margin-top: 2rem; width: 400px; }
+.log-container h3 { font-size: 0.7rem; color: #444; text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 1rem; }
+#status { font-size: 0.8rem; margin-bottom: 1.5rem; color: #888; }
