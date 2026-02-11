@@ -61,22 +61,26 @@ input[type="text"] {
     border-radius: 15px; color: #fff; margin-bottom: 20px; text-align: center; outline: none;
 }
 
-.button-group { display: flex; gap: 12px; }
-.btn-primary {
-    flex: 2; background: var(--gold); color: #000; font-weight: 700; border: none;
-    padding: 18px; border-radius: 15px; cursor: pointer; text-transform: uppercase;
-}
-.btn-secondary {
-    flex: 1; background: transparent; border: 1px solid var(--border); color: #444;
-    padding: 18px; border-radius: 15px; cursor: pointer; text-transform: uppercase;
+button:hover {
+    background-color: #333;
 }
 
-#sessionLog { list-style: none; padding: 0; max-height: 220px; overflow-y: auto; margin-top: 20px; }
-.log-item {
-    background: #080808; padding: 14px; border-radius: 15px; margin-bottom: 10px;
-    border-left: 4px solid var(--gold); font-size: 0.8rem; text-align: left;
-    display: flex; justify-content: space-between; align-items: center;
+input {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
 }
-.log-item.failed { border-left-color: var(--red); opacity: 0.5; }
-.text-btn { background: none; border: none; color: #333; font-size: 0.6rem; cursor: pointer; text-transform: uppercase; }
-#status { font-size: 0.7rem; color: #444; margin-bottom: 15px; font-style: italic; }
+
+#goalText {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #000;
+}
+
+#resetButton {
+    background-color: #999;
+}
+
+#resetButton:hover {
+    background-color: #777;
+}
