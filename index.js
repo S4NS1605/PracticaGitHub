@@ -9,6 +9,7 @@ const goalInput = document.getElementById('goalInput');
 const timerDisplay = document.getElementById('timer');
 const progressBar = document.getElementById('progressBar');
 const modeBtns = document.querySelectorAll('.mode-btn');
+const sessionLog = document.getElementById('sessionLog');
 
 function updateUI() {
     const minutes = Math.floor(timeLeft / 60);
@@ -18,16 +19,26 @@ function updateUI() {
     progressBar.style.width = `${percentage}%`;
 }
 
-// Selección de modo
+function addToLog(goal, completed = true) {
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    
+    const li = document.createElement('li');
+    li.className = 'log-item';
+    li.innerHTML = `
+        <span>${goal || "Sin nombre"}</span>
+        <span class="log-time">${completed ? '✓' : '×'} ${timeStr}</span>
+    `;
+    
+    sessionLog.prepend(li); // Añadir al inicio de la lista
+}
+
 modeBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-        if (timerId) return; // Bloquear cambio si está corriendo
-        
+        if (timerId) return;
         modeBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        
-        const minutes = parseInt(btn.dataset.time);
-        totalTime = minutes * 60;
+        totalTime = parseInt(btn.dataset.time) * 60;
         timeLeft = totalTime;
         updateUI();
     });
@@ -43,30 +54,45 @@ function startTimer() {
         if (timeLeft <= 0) {
             clearInterval(timerId);
             timerId = null;
-            new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play().catch(() => {});
-            statusText.innerText = "Ciclo terminado. Evalúa tus resultados.";
+            addToLog(goalInput.value, true);
+            statusText.innerText = "Victoria confirmada.";
+            resetInterface();
         }
     }, 1000);
+}
+
+function resetInterface() {
+    goalInput.disabled = false;
+    mainButton.disabled = false;
+    mainButton.innerText = "Iniciar";
 }
 
 mainButton.addEventListener('click', () => {
     const goal = goalInput.value.trim();
     if (!goal) {
-        statusText.innerText = "Sin objetivo no hay camino. Escribe algo.";
+        statusText.innerText = "Define tu objetivo primero.";
         return;
     }
-    statusText.innerText = `Enfoque: ${goal}`;
+    statusText.innerText = "Enfoque total activado.";
     goalInput.disabled = true;
     mainButton.disabled = true;
     startTimer();
 });
 
 resetButton.addEventListener('click', () => {
-    clearInterval(timerId);
-    timerId = null;
-    timeLeft = totalTime;
-    updateUI();
-    statusText.innerText = "Sistema reiniciado.";
-    goalInput.disabled = false;
-    mainButton.disabled = false;
+    if (timerId) {
+        if(confirm("¿Rendirse? Esta sesión no contará en tu registro.")) {
+            addToLog(goalInput.value + " (Cancelado)", false);
+            clearInterval(timerId);
+            timerId = null;
+            timeLeft = totalTime;
+            updateUI();
+            resetInterface();
+            statusText.innerText = "Sesión abortada.";
+        }
+    } else {
+        timeLeft = totalTime;
+        updateUI();
+        statusText.innerText = "Listo para comenzar.";
+    }
 });
