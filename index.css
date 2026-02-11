@@ -1,206 +1,76 @@
 :root {
     --gold: #d4af37;
     --dark-bg: #0a0a0a;
-    --card-bg: rgba(22, 22, 22, 0.95);
-    --text-main: #e0e0e0;
-    --text-dim: #666;
-    --error: #ff4757;
+    --card-bg: rgba(20, 20, 20, 0.98);
+    --text-dim: #555;
+    --red: #ff4757;
 }
 
 body {
-    margin: 0;
-    padding: 20px;
-    background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
-    color: var(--text-main);
-    font-family: 'Inter', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
+    margin: 0; padding: 20px; background: #050505; color: #fff;
+    font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
 }
 
-.container {
-    width: 100%;
-    max-width: 420px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
+.container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
 
-/* Dashboard de Stats */
 .stats-bar {
-    display: flex;
-    justify-content: space-around;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 15px;
-    border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex; justify-content: space-around; background: #111;
+    padding: 15px; border-radius: 20px; border: 1px solid #222;
 }
 
-.stat-item {
-    text-align: center;
-}
+.stat-item { text-align: center; }
+.stat-label { display: block; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim); }
+.stat-value { font-size: 1rem; font-weight: 700; color: var(--gold); }
 
-.stat-label {
-    display: block;
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-}
-
-.stat-value {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--gold);
-}
-
-/* Tarjeta Principal */
 .card {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    padding: 2.5rem;
-    border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+    background: var(--card-bg); padding: 2rem; border-radius: 30px;
+    border: 1px solid #222; box-shadow: 0 50px 100px rgba(0,0,0,0.9);
+    text-align: center; position: relative; overflow: hidden;
 }
 
-.progress-container {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.02);
+.progress-container { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #111; }
+.progress-bar { height: 100%; width: 100%; background: var(--gold); transition: width 1s linear; }
+
+/* Custom Time V11 */
+.custom-time-group {
+    display: flex; gap: 5px; margin-bottom: 15px; justify-content: center;
+}
+.custom-time-group input {
+    width: 60px !important; margin-bottom: 0 !important; padding: 8px !important; font-size: 0.8rem !important;
+}
+.custom-time-group button {
+    font-size: 0.7rem !important; padding: 8px 12px !important; background: #222 !important; color: #fff !important; flex: none !important;
 }
 
-.progress-bar {
-    height: 100%;
-    width: 100%;
-    background: linear-gradient(90deg, var(--gold), #f1c40f);
-    transition: width 1s linear;
-}
+.ambient-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
+.ambient-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; opacity: 0.3; transition: 0.3s; }
+.ambient-btn.active { opacity: 1; transform: scale(1.2); }
 
-h1 {
-    font-size: 0.75rem;
-    letter-spacing: 6px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-bottom: 20px;
-}
-
-/* Selectores de Tiempo */
-.mode-selector {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
+.mode-selector { display: flex; gap: 5px; justify-content: center; margin-bottom: 15px; }
 .mode-btn {
-    background: #111;
-    border: 1px solid #222;
-    color: var(--text-dim);
-    padding: 8px 12px;
-    border-radius: 10px;
-    font-size: 0.7rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    background: #151515; border: 1px solid #222; color: #666; padding: 6px 10px;
+    border-radius: 8px; cursor: pointer; font-size: 0.7rem;
+}
+.mode-btn.active { background: var(--gold); color: #000; font-weight: 700; }
+
+.timer-display { font-size: 5.5rem; font-weight: 100; margin: 10px 0; letter-spacing: -3px; }
+
+input[type="text"] {
+    width: 100%; background: #000; border: 1px solid #222; padding: 14px;
+    border-radius: 12px; color: #fff; margin-bottom: 15px; box-sizing: border-box; outline: none;
 }
 
-.mode-btn.active {
-    background: var(--gold);
-    color: #000;
-    border-color: var(--gold);
-    font-weight: 700;
+.button-group { display: flex; gap: 10px; }
+button:not(.mode-btn, .text-btn, .ambient-btn, #setCustomTime) {
+    flex: 2; background: var(--gold); color: #000; font-weight: 700; border: none;
+    padding: 16px; border-radius: 12px; cursor: pointer; text-transform: uppercase;
 }
+button.secondary { flex: 1; background: transparent; border: 1px solid #222; color: #666; }
 
-.timer-display {
-    font-size: 6rem;
-    font-weight: 100;
-    margin: 10px 0;
-    letter-spacing: -3px;
-    color: #fff;
-}
-
-/* Inputs y Botones */
-input {
-    width: 100%;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid #333;
-    padding: 16px;
-    border-radius: 15px;
-    color: #fff;
-    margin-bottom: 15px;
-    box-sizing: border-box;
-    text-align: center;
-    outline: none;
-}
-
-input:focus {
-    border-color: var(--gold);
-}
-
-.button-group {
-    display: flex;
-    gap: 12px;
-}
-
-button:not(.mode-btn, .text-btn) {
-    flex: 2;
-    background: var(--gold);
-    color: #000;
-    font-weight: 700;
-    border: none;
-    padding: 18px;
-    border-radius: 15px;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-button.secondary {
-    flex: 1;
-    background: transparent;
-    border: 1px solid #333;
-    color: var(--text-dim);
-}
-
-button:hover:not(:disabled) {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
-}
-
-/* Registro de Sesiones */
-.log-container {
-    margin-top: 10px;
-}
-
-.log-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 0 10px;
-}
-
-.text-btn {
-    background: none; border: none; color: var(--text-dim);
-    font-size: 0.6rem; cursor: pointer; text-transform: uppercase;
-}
-
-#sessionLog {
-    list-style: none; padding: 0; margin-top: 15px;
-    max-height: 250px; overflow-y: auto;
-}
-
+#sessionLog { list-style: none; padding: 0; max-height: 200px; overflow-y: auto; }
 .log-item {
-    background: rgba(255,255,255,0.02);
-    padding: 15px; border-radius: 15px; margin-bottom: 10px;
-    border-left: 4px solid var(--gold);
-    font-size: 0.85rem;
+    background: #111; padding: 12px; border-radius: 12px; margin-bottom: 8px;
+    border-left: 3px solid var(--gold); font-size: 0.8rem; text-align: left;
 }
-
-.log-item.failed { border-left-color: var(--error); opacity: 0.6; }
-
-#status { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 15px; font-style: italic; }
+.log-item.failed { border-left-color: var(--red); opacity: 0.5; }
+.text-btn { background: none; border: none; color: #444; font-size: 0.6rem; cursor: pointer; }

@@ -1,51 +1,62 @@
-// --- CONFIGURACIÓN Y ESTADO ---
 let totalTime = 25 * 60;
 let timeLeft = totalTime;
 let timerId = null;
-
-const quotes = {
-    success: ["La disciplina rinde frutos.", "Excelencia lograda.", "Enfoque de élite.", "Progreso constante."],
-    fail: ["La distracción costó caro.", "Redención necesaria.", "Vuelve a intentarlo.", "Sin atajos."]
-};
+let currentAmbient = null;
 
 const elements = {
     timerDisplay: document.getElementById('timer'),
     progressBar: document.getElementById('progressBar'),
     goalInput: document.getElementById('goalInput'),
-    statusText: document.getElementById('status'),
     mainButton: document.getElementById('mainButton'),
-    resetButton: document.getElementById('resetButton'),
-    sessionLog: document.getElementById('sessionLog'),
     totalTimeDisplay: document.getElementById('totalFocusTime'),
-    totalSessionsDisplay: document.getElementById('totalSessions'),
-    clearLog: document.getElementById('clearLog'),
-    soundSuccess: document.getElementById('soundSuccess'),
-    soundFail: document.getElementById('soundFail'),
-    modeBtns: document.querySelectorAll('.mode-btn')
+    rankStatus: document.getElementById('rankStatus'),
+    customMin: document.getElementById('customMin'),
+    setCustomBtn: document.getElementById('setCustomTime'),
+    sessionLog: document.getElementById('sessionLog'),
+    modeBtns: document.querySelectorAll('.mode-btn'),
+    ambientBtns: document.querySelectorAll('.ambient-btn')
 };
 
-// --- PERSISTENCIA Y CARGA ---
-window.addEventListener('DOMContentLoaded', () => {
+// --- RANGOS Y STATS ---
+function updateMastery() {
     const log = JSON.parse(localStorage.getItem('focusLog')) || [];
-    log.forEach(entry => renderLogEntry(entry.goal, entry.completed, entry.feedback, false));
-    updateStats();
-    updateUI();
-});
-
-function updateStats() {
-    const log = JSON.parse(localStorage.getItem('focusLog')) || [];
-    const successfulSessions = log.filter(e => e.completed);
+    const minutes = log.filter(e => e.completed).reduce((acc, curr) => acc + (curr.duration || 25), 0);
     
-    // Calcular tiempo total (asumiendo que cada sesión exitosa sumó su tiempo original)
-    // Para simplificar, usamos los minutos de los botones (15, 25, 45) si los guardáramos, 
-    // pero aquí sumaremos el éxito.
-    const minutes = successfulSessions.length * 25; // Promedio base
-    
-    elements.totalSessionsDisplay.innerText = successfulSessions.length;
     elements.totalTimeDisplay.innerText = `${minutes} min`;
+    
+    let rank = "Novato";
+    if (minutes > 60) rank = "Guerrero";
+    if (minutes > 300) rank = "Maestro";
+    if (minutes > 1000) rank = "Élite Zen";
+    elements.rankStatus.innerText = rank;
 }
 
-// --- LÓGICA DEL TEMPORIZADOR ---
+// --- TIEMPO PERSONALIZADO ---
+elements.setCustomBtn.addEventListener('click', () => {
+    const val = parseInt(elements.customMin.value);
+    if (val > 0 && val <= 120) {
+        totalTime = val * 60;
+        timeLeft = totalTime;
+        updateUI();
+        elements.modeBtns.forEach(b => b.classList.remove('active'));
+    }
+});
+
+// --- AUDIO AMBIENTE ---
+elements.ambientBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const sound = btn.dataset.sound;
+        if (currentAmbient) { currentAmbient.pause(); currentAmbient.currentTime = 0; }
+        elements.ambientBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (sound !== 'none') {
+            currentAmbient = document.getElementById(`amb-${sound}`);
+            currentAmbient.play().catch(() => {});
+        }
+    });
+});
+
+// --- CORE ---
 function updateUI() {
     const min = Math.floor(timeLeft / 60);
     const sec = timeLeft % 60;
@@ -64,88 +75,45 @@ elements.modeBtns.forEach(btn => {
     });
 });
 
-function startTimer() {
-    if (timerId) return;
+function finish(completed) {
+    const goal = elements.goalInput.value || "Misión";
+    const log = JSON.parse(localStorage.getItem('focusLog')) || [];
+    const duration = Math.floor(totalTime / 60);
+    log.push({ goal, completed, duration, date: new Date().toLocaleTimeString() });
+    localStorage.setItem('focusLog', JSON.stringify(log));
     
+    const li = document.createElement('li');
+    li.className = `log-item ${completed ? '' : 'failed'}`;
+    li.innerHTML = `<strong>${completed ? '✓' : '×'} ${goal}</strong> (${duration}m)`;
+    elements.sessionLog.prepend(li);
+    
+    if (completed) document.getElementById('soundSuccess').play().catch(()=>{});
+    updateMastery();
+    resetInt();
+}
+
+function start() {
+    if (timerId || !elements.goalInput.value) return;
+    elements.mainButton.disabled = true;
     timerId = setInterval(() => {
         timeLeft--;
         updateUI();
-        
-        if (timeLeft <= 0) {
-            clearInterval(timerId);
-            timerId = null;
-            completeSession();
-        }
+        if (timeLeft <= 0) { clearInterval(timerId); timerId = null; finish(true); }
     }, 1000);
 }
 
-function completeSession() {
-    const goal = elements.goalInput.value || "Sesión sin nombre";
-    saveSession(goal, true);
-    elements.soundSuccess.play().catch(()=>{});
-    resetInterface("Victoria confirmada.");
-}
-
-// --- GESTIÓN DE LOGS ---
-function saveSession(goal, completed) {
-    const feedbackList = completed ? quotes.success : quotes.fail;
-    const feedback = feedbackList[Math.floor(Math.random() * feedbackList.length)];
-    
-    const entry = { goal, completed, feedback, date: new Date().toLocaleTimeString() };
-    
-    const log = JSON.parse(localStorage.getItem('focusLog')) || [];
-    log.push(entry);
-    localStorage.setItem('focusLog', JSON.stringify(log));
-    
-    renderLogEntry(goal, completed, feedback, false);
-    updateStats();
-}
-
-function renderLogEntry(goal, completed, feedback) {
-    const li = document.createElement('li');
-    li.className = `log-item ${completed ? '' : 'failed'}`;
-    li.innerHTML = `
-        <strong>${completed ? '✓' : '×'} ${goal}</strong>
-        <p style="margin:5px 0 0; color:#888; font-size:0.7rem;">"${feedback}"</p>
-    `;
-    elements.sessionLog.prepend(li);
-}
-
-// --- BOTONES ---
-elements.mainButton.addEventListener('click', () => {
-    if (!elements.goalInput.value.trim()) {
-        elements.statusText.innerText = "Define un objetivo para empezar.";
-        return;
+document.getElementById('resetButton').addEventListener('click', () => {
+    if (timerId && confirm("¿Abortar misión?")) {
+        clearInterval(timerId); timerId = null; finish(false);
+        document.getElementById('soundFail').play().catch(()=>{});
     }
-    elements.mainButton.disabled = true;
-    elements.goalInput.disabled = true;
-    elements.statusText.innerText = "Enfoque total...";
-    startTimer();
+    timeLeft = totalTime; updateUI(); resetInt();
 });
 
-elements.resetButton.addEventListener('click', () => {
-    if (timerId) {
-        if (confirm("¿Abandonar la misión? No contará en tus stats.")) {
-            clearInterval(timerId);
-            timerId = null;
-            saveSession(elements.goalInput.value + " (Interrumpido)", false);
-            elements.soundFail.play().catch(()=>{});
-        }
-    }
-    timeLeft = totalTime;
-    updateUI();
-    resetInterface("Sistema reiniciado.");
-});
+function resetInt() { elements.mainButton.disabled = false; elements.goalInput.disabled = false; }
+elements.mainButton.addEventListener('click', start);
+document.getElementById('clearLog').addEventListener('click', () => { localStorage.clear(); location.reload(); });
 
-elements.clearLog.addEventListener('click', () => {
-    if(confirm("¿Borrar historial?")) {
-        localStorage.clear();
-        location.reload();
-    }
-});
-
-function resetInterface(msg) {
-    elements.mainButton.disabled = false;
-    elements.goalInput.disabled = false;
-    elements.statusText.innerText = msg;
-}
+// Init
+updateMastery();
+updateUI();
