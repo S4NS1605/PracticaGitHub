@@ -22,15 +22,50 @@
         </div>
 
         <div class="card">
-            <h1>Propósito del Día</h1>
-            <p id="status">Estado: En espera de acción.</p>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <h1 class="title">Command Center</h1>
 
-            <input type="text" id="goalInput" placeholder="Escribe tu propósito..." style="display:none; margin-bottom:10px; padding:8px; width:90%;">
+            <div class="ambient-selector">
+                <button class="ambient-btn active" data-sound="none">🔇</button>
+                <button class="ambient-btn" data-sound="rain">🌧️</button>
+                <button class="ambient-btn" data-sound="waves">🌊</button>
+                <button class="ambient-btn" data-sound="white">🌫️</button>
+            </div>
 
-            <p id="goalText"></p>
+            <div class="custom-time-wrapper">
+                <input type="number" id="customMin" placeholder="Min" min="1" max="180">
+                <button id="setCustomTime">Configurar</button>
+            </div>
 
-            <button id="mainButton">Iniciar Sesión</button>
-            <button id="resetButton" style="display:none; margin-top:10px;">Reiniciar</button>
+            <div class="mode-selector">
+                <button class="mode-btn" data-time="15">Sprint</button>
+                <button class="mode-btn active" data-time="25">Profundo</button>
+                <button class="mode-btn" data-time="45">Élite</button>
+            </div>
+            
+            <div class="timer-display" id="timer">25:00</div>
+            
+            <div class="input-group">
+                <input type="text" id="goalInput" placeholder="¿Cuál es tu misión absoluta?">
+            </div>
+
+            <p id="status">Sistema listo para la ejecución</p>
+            
+            <div class="button-group">
+                <button id="mainButton" class="btn-primary">Ejecutar</button>
+                <button id="resetButton" class="btn-secondary">Abortar</button>
+            </div>
+        </div>
+
+        <div class="log-container">
+            <div class="log-header">
+                <h3>Registro Permanente de Batallas</h3>
+                <button id="clearLog" class="text-btn">Formatear Memoria</button>
+            </div>
+            <ul id="sessionLog"></ul>
         </div>
     </div>
 
