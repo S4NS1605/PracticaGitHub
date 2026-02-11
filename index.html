@@ -9,9 +9,20 @@
 <body>
     <div class="container">
         <div class="card">
-            <h1>Propósito del Día</h1>
-            <p id="status">Estado: En espera de acción.</p>
-            <button id="mainButton">Iniciar Sesión</button>
+            <h1>Sistema de Enfoque</h1>
+            
+            <div class="timer-display" id="timer">25:00</div>
+            
+            <div class="input-group">
+                <input type="text" id="goalInput" placeholder="¿Cuál es tu prioridad hoy?">
+            </div>
+
+            <p id="status">Estado: Definiendo estrategia...</p>
+            
+            <div class="button-group">
+                <button id="mainButton">Fijar y Comenzar</button>
+                <button id="resetButton" class="secondary">Reset</button>
+            </div>
         </div>
     </div>
     <script src="index.js"></script>
