@@ -81,3 +81,9 @@ button:hover{
 button:active{
     transform:scale(.95);
 }
+
+.time{
+    margin-top:15px;
+    font-size:14px;
+    color:#222;
+}
