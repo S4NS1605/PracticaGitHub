@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Mentor | Sistema de Élite</title>
+    <title>Focus Mentor | Black Edition</title>
     <link rel="stylesheet" href="index.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700&display=swap" rel="stylesheet">
 </head>
@@ -12,11 +12,11 @@
     <div class="container">
         <div class="stats-bar">
             <div class="stat-item">
-                <span class="stat-label">Rango Actual</span>
+                <span class="stat-label">Rango de Disciplina</span>
                 <span id="rankStatus" class="stat-value">Novato</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Minutos Totales</span>
+                <span class="stat-label">Inversión Total</span>
                 <span id="totalFocusTime" class="stat-value">0 min</span>
             </div>
         </div>
@@ -26,42 +26,44 @@
                 <div class="progress-bar" id="progressBar"></div>
             </div>
             
-            <h1>Sistema de Enfoque Final</h1>
+            <h1 class="glitch">Deep Focus System</h1>
 
             <div class="ambient-selector">
-                <button class="ambient-btn active" data-sound="none">🔇</button>
-                <button class="ambient-btn" data-sound="rain" title="Lluvia">🌧️</button>
+                <button class="ambient-btn active" data-sound="none" title="Silencio">🔇</button>
+                <button class="ambient-btn" data-sound="rain" title="Lluvia Profunda">🌧️</button>
                 <button class="ambient-btn" data-sound="waves" title="Océano">🌊</button>
-                <button class="ambient-btn" data-sound="white" title="Blanco">🌫️</button>
+                <button class="ambient-btn" data-sound="white" title="Ruido Blanco">🌫️</button>
             </div>
 
-            <div class="custom-time-group">
+            <div class="custom-time-wrapper">
                 <input type="number" id="customMin" placeholder="Min" min="1" max="120">
-                <button id="setCustomTime">Fijar Tiempo</button>
+                <button id="setCustomTime">Configurar</button>
             </div>
 
             <div class="mode-selector">
-                <button class="mode-btn" data-time="15">15m</button>
-                <button class="mode-btn active" data-time="25">25m</button>
-                <button class="mode-btn" data-time="45">45m</button>
+                <button class="mode-btn" data-time="15">Sprint</button>
+                <button class="mode-btn active" data-time="25">Profundo</button>
+                <button class="mode-btn" data-time="45">Élite</button>
             </div>
             
             <div class="timer-display" id="timer">25:00</div>
             
-            <input type="text" id="goalInput" placeholder="¿Cuál es tu misión ahora?">
+            <div class="input-wrapper">
+                <input type="text" id="goalInput" placeholder="Define tu próximo hito...">
+            </div>
 
-            <p id="status">Listo para la ejecución</p>
+            <p id="status">Esperando órdenes...</p>
             
             <div class="button-group">
-                <button id="mainButton">Ejecutar</button>
+                <button id="mainButton" class="btn-glow">Ejecutar</button>
                 <button id="resetButton" class="secondary">Abortar</button>
             </div>
         </div>
 
         <div class="log-container">
             <div class="log-header">
-                <h3>Registro de Victorias</h3>
-                <button id="clearLog" class="text-btn">Reiniciar Todo</button>
+                <h3>Historial de Victorias</h3>
+                <button id="clearLog" class="text-btn">Borrar Memoria</button>
             </div>
             <ul id="sessionLog"></ul>
         </div>
@@ -69,9 +71,9 @@
 
     <audio id="soundSuccess" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
     <audio id="soundFail" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
-    <audio id="amb-rain" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" preload="none"></audio>
-    <audio id="amb-waves" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3" preload="none"></audio>
-    <audio id="amb-white" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3" preload="none"></audio>
+    <audio id="amb-rain" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3"></audio>
+    <audio id="amb-waves" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3"></audio>
+    <audio id="amb-white" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3"></audio>
     
     <script src="index.js"></script>
 </body>

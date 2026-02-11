@@ -4,70 +4,69 @@ let timerId = null;
 let currentAmbient = null;
 
 const elements = {
-    timerDisplay: document.getElementById('timer'),
-    progressBar: document.getElementById('progressBar'),
-    goalInput: document.getElementById('goalInput'),
-    mainButton: document.getElementById('mainButton'),
-    totalTimeDisplay: document.getElementById('totalFocusTime'),
-    rankStatus: document.getElementById('rankStatus'),
-    customMin: document.getElementById('customMin'),
+    timer: document.getElementById('timer'),
+    progress: document.getElementById('progressBar'),
+    goal: document.getElementById('goalInput'),
+    mainBtn: document.getElementById('mainButton'),
+    totalTimeDisp: document.getElementById('totalFocusTime'),
+    rankDisp: document.getElementById('rankStatus'),
+    customInp: document.getElementById('customMin'),
     setCustomBtn: document.getElementById('setCustomTime'),
-    sessionLog: document.getElementById('sessionLog'),
-    modeBtns: document.querySelectorAll('.mode-btn'),
-    ambientBtns: document.querySelectorAll('.ambient-btn')
+    logList: document.getElementById('sessionLog'),
+    modes: document.querySelectorAll('.mode-btn'),
+    ambients: document.querySelectorAll('.ambient-btn')
 };
 
-// --- RANGOS Y STATS ---
+// --- MAESTRÍA ---
 function updateMastery() {
     const log = JSON.parse(localStorage.getItem('focusLog')) || [];
-    const minutes = log.filter(e => e.completed).reduce((acc, curr) => acc + (curr.duration || 25), 0);
-    
-    elements.totalTimeDisplay.innerText = `${minutes} min`;
+    const mins = log.filter(e => e.completed).reduce((acc, curr) => acc + curr.duration, 0);
+    elements.totalTimeDisp.innerText = `${mins} min`;
     
     let rank = "Novato";
-    if (minutes > 60) rank = "Guerrero";
-    if (minutes > 300) rank = "Maestro";
-    if (minutes > 1000) rank = "Élite Zen";
-    elements.rankStatus.innerText = rank;
+    if (mins >= 60) rank = "Guerrero";
+    if (mins >= 300) rank = "Maestro";
+    if (mins >= 1000) rank = "Élite Zen";
+    elements.rankDisp.innerText = rank;
 }
 
 // --- TIEMPO PERSONALIZADO ---
 elements.setCustomBtn.addEventListener('click', () => {
-    const val = parseInt(elements.customMin.value);
+    const val = parseInt(elements.customInp.value);
     if (val > 0 && val <= 120) {
         totalTime = val * 60;
         timeLeft = totalTime;
         updateUI();
-        elements.modeBtns.forEach(b => b.classList.remove('active'));
+        elements.modes.forEach(m => m.classList.remove('active'));
     }
 });
 
 // --- AUDIO AMBIENTE ---
-elements.ambientBtns.forEach(btn => {
+elements.ambients.forEach(btn => {
     btn.addEventListener('click', () => {
-        const sound = btn.dataset.sound;
+        const soundId = btn.dataset.sound;
         if (currentAmbient) { currentAmbient.pause(); currentAmbient.currentTime = 0; }
-        elements.ambientBtns.forEach(b => b.classList.remove('active'));
+        elements.ambients.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        if (sound !== 'none') {
-            currentAmbient = document.getElementById(`amb-${sound}`);
-            currentAmbient.play().catch(() => {});
+        if (soundId !== 'none') {
+            currentAmbient = document.getElementById(`amb-${soundId}`);
+            currentAmbient.play();
         }
     });
 });
 
-// --- CORE ---
+// --- CORE LOGIC ---
 function updateUI() {
     const min = Math.floor(timeLeft / 60);
     const sec = timeLeft % 60;
-    elements.timerDisplay.innerText = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-    elements.progressBar.style.width = `${(timeLeft / totalTime) * 100}%`;
+    elements.timer.innerText = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    elements.progress.style.width = `${(timeLeft / totalTime) * 100}%`;
 }
 
-elements.modeBtns.forEach(btn => {
+elements.modes.forEach(btn => {
     btn.addEventListener('click', () => {
         if (timerId) return;
-        elements.modeBtns.forEach(b => b.classList.remove('active'));
+        elements.modes.forEach(m => m.classList.remove('active'));
         btn.classList.add('active');
         totalTime = parseInt(btn.dataset.time) * 60;
         timeLeft = totalTime;
@@ -76,25 +75,27 @@ elements.modeBtns.forEach(btn => {
 });
 
 function finish(completed) {
-    const goal = elements.goalInput.value || "Misión";
+    const goalText = elements.goal.value || "Misión sin nombre";
     const log = JSON.parse(localStorage.getItem('focusLog')) || [];
-    const duration = Math.floor(totalTime / 60);
-    log.push({ goal, completed, duration, date: new Date().toLocaleTimeString() });
+    const dur = Math.floor(totalTime / 60);
+    
+    log.push({ goal: goalText, completed, duration: completed ? dur : 0 });
     localStorage.setItem('focusLog', JSON.stringify(log));
     
     const li = document.createElement('li');
     li.className = `log-item ${completed ? '' : 'failed'}`;
-    li.innerHTML = `<strong>${completed ? '✓' : '×'} ${goal}</strong> (${duration}m)`;
-    elements.sessionLog.prepend(li);
+    li.innerHTML = `<strong>${completed ? '✓' : '×'} ${goalText}</strong> <small style="float:right">${dur}m</small>`;
+    elements.logList.prepend(li);
     
-    if (completed) document.getElementById('soundSuccess').play().catch(()=>{});
+    if (completed) document.getElementById('soundSuccess').play();
     updateMastery();
-    resetInt();
+    resetState();
 }
 
 function start() {
-    if (timerId || !elements.goalInput.value) return;
-    elements.mainButton.disabled = true;
+    if (timerId || !elements.goal.value.trim()) return;
+    elements.mainBtn.disabled = true;
+    elements.goal.disabled = true;
     timerId = setInterval(() => {
         timeLeft--;
         updateUI();
@@ -103,17 +104,17 @@ function start() {
 }
 
 document.getElementById('resetButton').addEventListener('click', () => {
-    if (timerId && confirm("¿Abortar misión?")) {
+    if (timerId && confirm("¿Abortar misión? Esto no contará en tus estadísticas.")) {
         clearInterval(timerId); timerId = null; finish(false);
-        document.getElementById('soundFail').play().catch(()=>{});
+        document.getElementById('soundFail').play();
     }
-    timeLeft = totalTime; updateUI(); resetInt();
+    timeLeft = totalTime; updateUI(); resetState();
 });
 
-function resetInt() { elements.mainButton.disabled = false; elements.goalInput.disabled = false; }
-elements.mainButton.addEventListener('click', start);
-document.getElementById('clearLog').addEventListener('click', () => { localStorage.clear(); location.reload(); });
+function resetState() { elements.mainBtn.disabled = false; elements.goal.disabled = false; }
+elements.mainBtn.addEventListener('click', start);
+document.getElementById('clearLog').addEventListener('click', () => { if(confirm("¿Borrar todo?")) { localStorage.clear(); location.reload(); }});
 
-// Init
+// Start
 updateMastery();
 updateUI();
