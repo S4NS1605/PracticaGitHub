@@ -41,3 +41,23 @@ button {
 button:hover {
     background-color: #333;
 }
+
+input {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+#goalText {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #000;
+}
+
+#resetButton {
+    background-color: #999;
+}
+
+#resetButton:hover {
+    background-color: #777;
+}
