@@ -65,6 +65,7 @@ function renderEntry(entry) {
 els.setCustomBtn.addEventListener('click', () => {
     if (timerId) return;
     const val = parseInt(els.customInp.value);
+    if (isNaN(val)) return alert("Ingresa un número válido");
     if (val > 0 && val <= 180) {
         totalTime = val * 60;
         timeLeft = totalTime;
