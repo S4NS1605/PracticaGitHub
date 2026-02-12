@@ -5,6 +5,7 @@
     --border: #1a1a1a;
     --red: #ff4757;
     --text-muted: #555;
+    --white: #ffffff;
 }
 
 body {
@@ -21,7 +22,6 @@ body {
 .stat-label { display: block; font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; }
 .stat-value { font-size: 1rem; font-weight: 700; color: var(--gold); }
 
-/* Animación para éxito alto */
 .success-glow { animation: pulse 2s infinite; }
 @keyframes pulse { 0% { color: var(--gold); } 50% { color: #fff; text-shadow: 0 0 10px var(--gold); } 100% { color: var(--gold); } }
 
@@ -41,7 +41,7 @@ body {
 .mode-selector { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
 .mode-btn {
     background: #000; border: 1px solid var(--border); color: #444;
-    padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 0.7rem;
+    padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 0.7rem; transition: 0.3s;
 }
 .mode-btn.active { border-color: var(--gold); color: #fff; background: #111; }
 
@@ -49,25 +49,31 @@ body {
 .custom-time-wrapper input { width: 60px; background: #000; border: 1px solid var(--border); border-radius: 8px; color: var(--gold); text-align: center; outline: none; }
 .btn-setup { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-size: 0.6rem; padding: 5px 10px; border-radius: 8px; cursor: pointer; text-transform: uppercase; }
 
-.timer-display { font-size: 6rem; font-weight: 100; margin: 10px 0; letter-spacing: -4px; }
+.timer-display { font-size: 6rem; font-weight: 100; margin: 10px 0; letter-spacing: -4px; transition: color 0.3s; }
 
 input[type="text"] {
     width: 100%; background: #000; border: 1px solid var(--border); padding: 15px;
     border-radius: 15px; color: #fff; text-align: center; outline: none; box-sizing: border-box;
 }
 
-#status { font-size: 0.7rem; color: #444; margin: 15px 0; font-style: italic; }
+#status { font-size: 0.7rem; color: #444; margin: 15px 0; font-style: italic; min-height: 14px; }
 
 .button-group { display: flex; gap: 10px; }
-.btn-primary { flex: 2; background: var(--gold); color: #000; font-weight: 700; border: none; padding: 18px; border-radius: 15px; cursor: pointer; text-transform: uppercase; }
+.btn-primary { flex: 2; background: var(--gold); color: #000; font-weight: 700; border: none; padding: 18px; border-radius: 15px; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+.btn-primary:active { transform: scale(0.98); }
 .btn-secondary { flex: 1; background: transparent; border: 1px solid var(--border); color: #444; padding: 18px; border-radius: 15px; cursor: pointer; text-transform: uppercase; }
 
 .ambient-selector { display: flex; justify-content: center; gap: 15px; margin-top: 20px; opacity: 0.3; transition: 0.3s; }
 .ambient-selector:hover { opacity: 1; }
-.ambient-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; filter: grayscale(1); }
+.ambient-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; filter: grayscale(1); transition: 0.3s; }
 .ambient-btn.active { filter: grayscale(0); transform: scale(1.2); }
 
-#sessionLog { list-style: none; padding: 0; margin-top: 20px; max-height: 200px; overflow-y: auto; }
-.log-item { background: #080808; padding: 12px; border-radius: 12px; margin-bottom: 8px; border-left: 3px solid var(--gold); font-size: 0.8rem; display: flex; justify-content: space-between; }
+.log-container { width: 100%; margin-top: 30px; }
+.log-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; }
+.log-header h3 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); }
+
+#sessionLog { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; }
+.log-item { background: #080808; padding: 12px; border-radius: 12px; margin-bottom: 8px; border-left: 3px solid var(--gold); font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
 .log-item.failed { border-left-color: var(--red); opacity: 0.4; }
-.text-btn { background: none; border: none; color: #222; font-size: 0.6rem; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+.text-btn { background: none; border: none; color: #444; font-size: 0.6rem; cursor: pointer; text-transform: uppercase; }
+.text-btn:hover { color: var(--red); }

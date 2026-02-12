@@ -2,6 +2,7 @@
 let totalTime = 25 * 60;
 let timeLeft = totalTime;
 let timerId = null;
+let isPaused = false;
 let currentAmbient = null;
 
 const els = {
@@ -30,12 +31,9 @@ function loadData() {
 
 function updateAnalytics(log) {
     const completedSessions = log.filter(e => e.completed);
-    
-    // 1. Minutos Totales
     const mins = completedSessions.reduce((acc, curr) => acc + curr.duration, 0);
     els.totalTimeDisp.innerText = `${mins} min`;
     
-    // 2. Tasa de Éxito
     if (log.length > 0) {
         const rate = Math.round((completedSessions.length / log.length) * 100);
         els.successRateDisp.innerText = `${rate}%`;
@@ -43,7 +41,6 @@ function updateAnalytics(log) {
         else els.successRateDisp.classList.remove('success-glow');
     }
 
-    // 3. Rangos
     let rank = "Novato";
     if (mins >= 60) rank = "Guerrero";
     if (mins >= 300) rank = "Maestro";
@@ -75,7 +72,7 @@ function renderEntry(entry) {
     els.logList.prepend(li);
 }
 
-// --- CONTROLES INTUITIVOS ---
+// --- CONTROLES DE TIEMPO ---
 function setTime(seconds, btn) {
     if (timerId) return;
     totalTime = seconds;
@@ -103,12 +100,14 @@ els.ambients.forEach(btn => {
         btn.classList.add('active');
         if (sound !== 'none') {
             currentAmbient = document.getElementById(`amb-${sound}`);
-            currentAmbient.play().catch(()=>{});
+            if (timerId && !isPaused) currentAmbient.play().catch(()=>{});
+        } else {
+            currentAmbient = null;
         }
     });
 });
 
-// --- CORE ---
+// --- CORE LOGIC (START / PAUSE / RESUME) ---
 function updateUI() {
     const m = Math.floor(timeLeft / 60);
     const s = timeLeft % 60;
@@ -116,36 +115,70 @@ function updateUI() {
     els.progress.style.width = `${(timeLeft / totalTime) * 100}%`;
 }
 
-function start() {
-    if (timerId) return;
+function handleMainAction() {
+    if (!timerId) {
+        startSession();
+    } else {
+        togglePause();
+    }
+}
+
+function startSession() {
     if (!els.goal.value.trim()) {
         els.status.innerText = "⚠️ ERROR: Escribe tu meta primero.";
         els.goal.focus();
         return;
     }
-    els.mainBtn.disabled = true;
-    els.goal.disabled = true;
-    els.status.innerText = "Enfoque absoluto activado.";
     
+    isPaused = false;
+    els.goal.disabled = true;
+    els.mainBtn.innerText = "Pausar";
+    els.status.innerText = "Enfoque absoluto activado.";
+    if (currentAmbient) currentAmbient.play().catch(()=>{});
+
     timerId = setInterval(() => {
-        timeLeft--;
-        updateUI();
-        if (timeLeft <= 0) {
-            clearInterval(timerId);
-            timerId = null;
-            document.getElementById('soundSuccess').play().catch(()=>{});
-            saveEntry(els.goal.value, true);
-            resetInterface("¡Victoria! Meta alcanzada.");
+        if (!isPaused) {
+            timeLeft--;
+            updateUI();
+            if (timeLeft <= 0) {
+                finishSession();
+            }
         }
     }, 1000);
 }
 
-els.mainBtn.addEventListener('click', start);
+function togglePause() {
+    isPaused = !isPaused;
+    if (isPaused) {
+        els.mainBtn.innerText = "Reanudar";
+        els.mainBtn.style.background = "#fff";
+        els.timer.style.color = "#444";
+        els.status.innerText = "Sesión pausada. El mundo espera.";
+        if (currentAmbient) currentAmbient.pause();
+    } else {
+        els.mainBtn.innerText = "Pausar";
+        els.mainBtn.style.background = "var(--gold)";
+        els.timer.style.color = "#fff";
+        els.status.innerText = "Enfoque reanudado.";
+        if (currentAmbient) currentAmbient.play().catch(()=>{});
+    }
+}
+
+function finishSession() {
+    clearInterval(timerId);
+    timerId = null;
+    document.getElementById('soundSuccess').play().catch(()=>{});
+    saveEntry(els.goal.value, true);
+    resetInterface("¡Victoria! Meta alcanzada.");
+}
+
+els.mainBtn.addEventListener('click', handleMainAction);
 
 document.getElementById('resetButton').addEventListener('click', () => {
     if (timerId && confirm("¿Vas a rendirte? Quedará registrado.")) {
         clearInterval(timerId);
         timerId = null;
+        if (currentAmbient) { currentAmbient.pause(); currentAmbient.currentTime = 0; }
         document.getElementById('soundFail').play().catch(()=>{});
         saveEntry(els.goal.value + " (Rendido)", false);
         resetInterface("Misión abortada.");
@@ -155,14 +188,16 @@ document.getElementById('resetButton').addEventListener('click', () => {
 });
 
 function resetInterface(msg) {
-    els.mainBtn.disabled = false;
+    els.mainBtn.innerText = "Ejecutar";
+    els.mainBtn.style.background = "var(--gold)";
+    els.timer.style.color = "#fff";
     els.goal.disabled = false;
     els.goal.value = "";
     els.status.innerText = msg;
 }
 
 document.getElementById('clearLog').addEventListener('click', () => {
-    if(confirm("¿Borrar todo?")) { localStorage.clear(); location.reload(); }
+    if(confirm("¿Borrar todo el historial?")) { localStorage.clear(); location.reload(); }
 });
 
 loadData();
