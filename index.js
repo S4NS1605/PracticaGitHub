@@ -72,7 +72,7 @@ function renderEntry(entry) {
     els.logList.prepend(li);
 }
 
-// --- CONTROLES DE TIEMPO ---
+// --- CONTROLES DEL TIEMPO ---
 function setTime(seconds, btn) {
     if (timerId) return;
     totalTime = seconds;
@@ -107,7 +107,7 @@ els.ambients.forEach(btn => {
     });
 });
 
-// --- CORE LOGIC (START / PAUSE / RESUME) ---
+// --- seccion de (START / PAUSE / RESUME) ---
 function updateUI() {
     const m = Math.floor(timeLeft / 60);
     const s = timeLeft % 60;
