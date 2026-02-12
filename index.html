@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Mentor | Absolute Edition</title>
+    <title>Focus Mentor | Professional Edition</title>
     <link rel="stylesheet" href="index.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700&display=swap" rel="stylesheet">
 </head>
@@ -12,11 +12,11 @@
     <div class="container">
         <div class="stats-bar">
             <div class="stat-item">
-                <span class="stat-label">Rango de Poder</span>
+                <span class="stat-label">Rango de Disciplina</span>
                 <span id="rankStatus" class="stat-value">Novato</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Tiempo Invertido</span>
+                <span class="stat-label">Inversión Total</span>
                 <span id="totalFocusTime" class="stat-value">0 min</span>
             </div>
         </div>
@@ -26,7 +26,37 @@
                 <div class="progress-bar" id="progressBar"></div>
             </div>
             
-            <h1 class="title">Sonidos</h1>
+            <h1 class="title">Centro de Mando</h1>
+
+            <div class="setup-section">
+                <label class="step-label">1. Define tu tiempo</label>
+                <div class="mode-selector">
+                    <button class="mode-btn" data-time="15">15 min</button>
+                    <button class="mode-btn active" data-time="25">25 min</button>
+                    <button class="mode-btn" data-time="45">45 min</button>
+                </div>
+
+                <div class="custom-time-wrapper">
+                    <input type="number" id="customMin" placeholder="Ej: 60" min="1" max="180">
+                    <button id="setCustomTime" class="btn-setup">Configurar Minutos</button>
+                </div>
+            </div>
+
+            <div class="timer-display" id="timer">25:00</div>
+            
+            <div class="setup-section">
+                <label class="step-label">2. Define tu misión</label>
+                <div class="input-group">
+                    <input type="text" id="goalInput" placeholder="¿Qué vas a lograr hoy?">
+                </div>
+            </div>
+
+            <p id="status">Paso 1: Elige tiempo o personalízalo. Paso 2: Escribe tu meta.</p>
+            
+            <div class="button-group">
+                <button id="mainButton" class="btn-primary">Ejecutar Enfoque</button>
+                <button id="resetButton" class="btn-secondary">Abortar</button>
+            </div>
 
             <div class="ambient-selector">
                 <button class="ambient-btn active" data-sound="none">🔇</button>
@@ -34,36 +64,12 @@
                 <button class="ambient-btn" data-sound="waves">🌊</button>
                 <button class="ambient-btn" data-sound="white">🌫️</button>
             </div>
-
-            <div class="custom-time-wrapper">
-                <input type="number" id="customMin" placeholder="Min" min="1" max="180">
-                <button id="setCustomTime">Configurar</button>
-            </div>
-
-            <div class="mode-selector">
-                <button class="mode-btn" data-time="15">Sprint</button>
-                <button class="mode-btn active" data-time="25">Profundo</button>
-                <button class="mode-btn" data-time="45">Élite</button>
-            </div>
-            
-            <div class="timer-display" id="timer">25:00</div>
-            
-            <div class="input-group">
-                <input type="text" id="goalInput" placeholder="¿Cuál es tu misión absoluta?">
-            </div>
-
-            <p id="status">Sistema listo para la ejecución</p>
-            
-            <div class="button-group">
-                <button id="mainButton" class="btn-primary">Ejecutar</button>
-                <button id="resetButton" class="btn-secondary">Abortar</button>
-            </div>
         </div>
 
         <div class="log-container">
             <div class="log-header">
-                <h3>Registro de Batallas</h3>
-                <button id="clearLog" class="text-btn">Formatear Memoria</button>
+                <h3>Historial de Victorias</h3>
+                <button id="clearLog" class="text-btn">Reiniciar Todo</button>
             </div>
             <ul id="sessionLog"></ul>
         </div>

@@ -15,13 +15,14 @@ const els = {
     setCustomBtn: document.getElementById('setCustomTime'),
     logList: document.getElementById('sessionLog'),
     modes: document.querySelectorAll('.mode-btn'),
-    ambients: document.querySelectorAll('.ambient-btn')
+    ambients: document.querySelectorAll('.ambient-btn'),
+    status: document.getElementById('status')
 };
 
 // --- PERSISTENCIA BLINDADA ---
 function loadData() {
     const log = JSON.parse(localStorage.getItem('absoluteLog')) || [];
-    els.logList.innerHTML = ''; // Limpiar UI antes de recargar
+    els.logList.innerHTML = ''; 
     log.forEach(entry => renderEntry(entry));
     updateMastery(log);
 }
@@ -48,7 +49,7 @@ function saveEntry(goal, completed) {
     };
     log.push(newEntry);
     localStorage.setItem('absoluteLog', JSON.stringify(log));
-    loadData(); // Refrescar UI y Stats
+    loadData();
 }
 
 function renderEntry(entry) {
@@ -56,31 +57,40 @@ function renderEntry(entry) {
     li.className = `log-item ${entry.completed ? '' : 'failed'}`;
     li.innerHTML = `
         <span><strong>${entry.completed ? '✓' : '×'}</strong> ${entry.goal}</span>
-        <span style="color:#444; font-size:0.7rem;">${entry.completed ? entry.duration + 'm' : 'ABORT'} | ${entry.time}</span>
+        <span style="color:#444; font-size:0.75rem;">${entry.completed ? entry.duration + 'm' : 'ABORT'} | ${entry.time}</span>
     `;
     els.logList.prepend(li);
 }
 
-// --- CONTROL DE TIEMPO ---
+// --- INTUICIÓN MEJORADA: TIEMPO ---
+function updateSelectedTime(seconds, sourceElement) {
+    totalTime = seconds;
+    timeLeft = totalTime;
+    updateUI();
+    
+    els.modes.forEach(m => m.classList.remove('active'));
+    if (sourceElement) sourceElement.classList.add('active');
+    
+    const mins = Math.floor(seconds / 60);
+    els.status.innerText = `✅ Tiempo fijado en ${mins} min. ¡Ahora escribe tu meta!`;
+    els.status.style.color = "var(--gold)";
+}
+
 els.setCustomBtn.addEventListener('click', () => {
     if (timerId) return;
     const val = parseInt(els.customInp.value);
     if (val > 0 && val <= 180) {
-        totalTime = val * 60;
-        timeLeft = totalTime;
-        updateUI();
-        els.modes.forEach(m => m.classList.remove('active'));
+        updateSelectedTime(val * 60, null);
+    } else {
+        els.status.innerText = "⚠️ Error: Ingresa un valor entre 1 y 180.";
+        els.status.style.color = "var(--red)";
     }
 });
 
 els.modes.forEach(btn => {
     btn.addEventListener('click', () => {
         if (timerId) return;
-        els.modes.forEach(m => m.classList.remove('active'));
-        btn.classList.add('active');
-        totalTime = parseInt(btn.dataset.time) * 60;
-        timeLeft = totalTime;
-        updateUI();
+        updateSelectedTime(parseInt(btn.dataset.time) * 60, btn);
     });
 });
 
@@ -94,6 +104,7 @@ els.ambients.forEach(btn => {
         if (sound !== 'none') {
             currentAmbient = document.getElementById(`amb-${sound}`);
             currentAmbient.play().catch(()=>{});
+            els.status.innerText = "Atmósfera activada. Concentración máxima.";
         }
     });
 });
@@ -107,13 +118,19 @@ function updateUI() {
 }
 
 function start() {
-    if (timerId || !els.goal.value.trim()) {
-        document.getElementById('status').innerText = "Define tu misión primero.";
+    if (timerId) return;
+    
+    if (!els.goal.value.trim()) {
+        els.status.innerText = "⚠️ ALERTA: No has definido una meta para este tiempo.";
+        els.status.style.color = "var(--red)";
+        els.goal.focus();
         return;
     }
+
     els.mainBtn.disabled = true;
     els.goal.disabled = true;
-    document.getElementById('status').innerText = "Enfoque absoluto activado.";
+    els.status.innerText = "Misión en curso. Mantén el enfoque.";
+    els.status.style.color = "#fff";
     
     timerId = setInterval(() => {
         timeLeft--;
@@ -123,38 +140,40 @@ function start() {
             timerId = null;
             document.getElementById('soundSuccess').play().catch(()=>{});
             saveEntry(els.goal.value, true);
-            resetInterface("Victoria registrada.");
+            resetInterface("🎯 ¡Victoria! Meta alcanzada.");
         }
     }, 1000);
 }
 
 document.getElementById('resetButton').addEventListener('click', () => {
-    if (timerId && confirm("¿Abortar misión? Esto quedará registrado como una retirada.")) {
+    if (timerId && confirm("¿Vas a rendirte? La disciplina se construye terminando lo que empiezas.")) {
         clearInterval(timerId);
         timerId = null;
         document.getElementById('soundFail').play().catch(()=>{});
-        saveEntry(els.goal.value + " (Interrumpido)", false);
+        saveEntry(els.goal.value + " (Rendido)", false);
         timeLeft = totalTime;
         updateUI();
-        resetInterface("Misión abortada.");
+        resetInterface("Misión abortada. El historial no olvida.");
     }
 });
 
 function resetInterface(msg) {
     els.mainBtn.disabled = false;
     els.goal.disabled = false;
-    document.getElementById('status').innerText = msg;
+    els.goal.value = ""; 
+    els.status.innerText = msg;
+    els.status.style.color = "var(--gold)";
 }
 
 els.mainBtn.addEventListener('click', start);
 
 document.getElementById('clearLog').addEventListener('click', () => {
-    if(confirm("¿Deseas resetear tu historial de vida? Esto es irreversible.")) {
+    if(confirm("¿Deseas borrar todo tu historial?")) {
         localStorage.removeItem('absoluteLog');
         location.reload();
     }
 });
 
-// INICIALIZACIÓN
+// INICIO
 loadData();
 updateUI();
