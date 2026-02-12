@@ -2,6 +2,7 @@
 let totalTime = 25 * 60;
 let timeLeft = totalTime;
 let timerId = null;
+let isPaused = false;
 let currentAmbient = null;
 
 const els = {
@@ -11,6 +12,7 @@ const els = {
     mainBtn: document.getElementById('mainButton'),
     totalTimeDisp: document.getElementById('totalFocusTime'),
     rankDisp: document.getElementById('rankStatus'),
+    successRateDisp: document.getElementById('successRate'),
     customInp: document.getElementById('customMin'),
     setCustomBtn: document.getElementById('setCustomTime'),
     logList: document.getElementById('sessionLog'),
@@ -19,18 +21,26 @@ const els = {
     status: document.getElementById('status')
 };
 
-// --- PERSISTENCIA BLINDADA ---
+// --- PERSISTENCIA Y ANALÍTICA ---
 function loadData() {
     const log = JSON.parse(localStorage.getItem('absoluteLog')) || [];
     els.logList.innerHTML = ''; 
     log.forEach(entry => renderEntry(entry));
-    updateMastery(log);
+    updateAnalytics(log);
 }
 
-function updateMastery(log) {
-    const mins = log.filter(e => e.completed).reduce((acc, curr) => acc + curr.duration, 0);
+function updateAnalytics(log) {
+    const completedSessions = log.filter(e => e.completed);
+    const mins = completedSessions.reduce((acc, curr) => acc + curr.duration, 0);
     els.totalTimeDisp.innerText = `${mins} min`;
     
+    if (log.length > 0) {
+        const rate = Math.round((completedSessions.length / log.length) * 100);
+        els.successRateDisp.innerText = `${rate}%`;
+        if (rate >= 80) els.successRateDisp.classList.add('success-glow');
+        else els.successRateDisp.classList.remove('success-glow');
+    }
+
     let rank = "Novato";
     if (mins >= 60) rank = "Guerrero";
     if (mins >= 300) rank = "Maestro";
@@ -57,41 +67,28 @@ function renderEntry(entry) {
     li.className = `log-item ${entry.completed ? '' : 'failed'}`;
     li.innerHTML = `
         <span><strong>${entry.completed ? '✓' : '×'}</strong> ${entry.goal}</span>
-        <span style="color:#444; font-size:0.75rem;">${entry.completed ? entry.duration + 'm' : 'ABORT'} | ${entry.time}</span>
+        <span style="color:#444;">${entry.completed ? entry.duration + 'm' : 'FALLO'}</span>
     `;
     els.logList.prepend(li);
 }
 
-// --- INTUICIÓN MEJORADA: TIEMPO ---
-function updateSelectedTime(seconds, sourceElement) {
+// --- CONTROLES DE TIEMPO ---
+function setTime(seconds, btn) {
+    if (timerId) return;
     totalTime = seconds;
     timeLeft = totalTime;
     updateUI();
-    
     els.modes.forEach(m => m.classList.remove('active'));
-    if (sourceElement) sourceElement.classList.add('active');
-    
-    const mins = Math.floor(seconds / 60);
-    els.status.innerText = `✅ Tiempo fijado en ${mins} min. ¡Ahora escribe tu meta!`;
-    els.status.style.color = "var(--gold)";
+    if (btn) btn.classList.add('active');
+    els.status.innerText = `Listo para ${Math.floor(seconds/60)} minutos. Define tu misión.`;
 }
 
-els.setCustomBtn.addEventListener('click', () => {
-    if (timerId) return;
-    const val = parseInt(els.customInp.value);
-    if (val > 0 && val <= 180) {
-        updateSelectedTime(val * 60, null);
-    } else {
-        els.status.innerText = "⚠️ Error: Ingresa un valor entre 1 y 180.";
-        els.status.style.color = "var(--red)";
-    }
-});
+els.modes.forEach(btn => btn.addEventListener('click', () => setTime(parseInt(btn.dataset.time) * 60, btn)));
 
-els.modes.forEach(btn => {
-    btn.addEventListener('click', () => {
-        if (timerId) return;
-        updateSelectedTime(parseInt(btn.dataset.time) * 60, btn);
-    });
+els.setCustomBtn.addEventListener('click', () => {
+    const val = parseInt(els.customInp.value);
+    if (val > 0 && val <= 180) setTime(val * 60, null);
+    else els.status.innerText = "Ingresa entre 1 y 180 min.";
 });
 
 // --- AUDIO AMBIENTE ---
@@ -103,13 +100,14 @@ els.ambients.forEach(btn => {
         btn.classList.add('active');
         if (sound !== 'none') {
             currentAmbient = document.getElementById(`amb-${sound}`);
-            currentAmbient.play().catch(()=>{});
-            els.status.innerText = "Atmósfera activada. Concentración máxima.";
+            if (timerId && !isPaused) currentAmbient.play().catch(()=>{});
+        } else {
+            currentAmbient = null;
         }
     });
 });
 
-// --- CORE LOGIC ---
+// --- CORE LOGIC (START / PAUSE / RESUME) ---
 function updateUI() {
     const m = Math.floor(timeLeft / 60);
     const s = timeLeft % 60;
@@ -117,63 +115,90 @@ function updateUI() {
     els.progress.style.width = `${(timeLeft / totalTime) * 100}%`;
 }
 
-function start() {
-    if (timerId) return;
-    
+function handleMainAction() {
+    if (!timerId) {
+        startSession();
+    } else {
+        togglePause();
+    }
+}
+
+function startSession() {
     if (!els.goal.value.trim()) {
-        els.status.innerText = "⚠️ ALERTA: No has definido una meta para este tiempo.";
-        els.status.style.color = "var(--red)";
+        els.status.innerText = "⚠️ ERROR: Escribe tu meta primero.";
         els.goal.focus();
         return;
     }
-
-    els.mainBtn.disabled = true;
-    els.goal.disabled = true;
-    els.status.innerText = "Misión en curso. Mantén el enfoque.";
-    els.status.style.color = "#fff";
     
+    isPaused = false;
+    els.goal.disabled = true;
+    els.mainBtn.innerText = "Pausar";
+    els.status.innerText = "Enfoque absoluto activado.";
+    if (currentAmbient) currentAmbient.play().catch(()=>{});
+
     timerId = setInterval(() => {
-        timeLeft--;
-        updateUI();
-        if (timeLeft <= 0) {
-            clearInterval(timerId);
-            timerId = null;
-            document.getElementById('soundSuccess').play().catch(()=>{});
-            saveEntry(els.goal.value, true);
-            resetInterface("🎯 ¡Victoria! Meta alcanzada.");
+        if (!isPaused) {
+            timeLeft--;
+            updateUI();
+            if (timeLeft <= 0) {
+                finishSession();
+            }
         }
     }, 1000);
 }
 
+function togglePause() {
+    isPaused = !isPaused;
+    if (isPaused) {
+        els.mainBtn.innerText = "Reanudar";
+        els.mainBtn.style.background = "#fff";
+        els.timer.style.color = "#444";
+        els.status.innerText = "Sesión pausada. El mundo espera.";
+        if (currentAmbient) currentAmbient.pause();
+    } else {
+        els.mainBtn.innerText = "Pausar";
+        els.mainBtn.style.background = "var(--gold)";
+        els.timer.style.color = "#fff";
+        els.status.innerText = "Enfoque reanudado.";
+        if (currentAmbient) currentAmbient.play().catch(()=>{});
+    }
+}
+
+function finishSession() {
+    clearInterval(timerId);
+    timerId = null;
+    document.getElementById('soundSuccess').play().catch(()=>{});
+    saveEntry(els.goal.value, true);
+    resetInterface("¡Victoria! Meta alcanzada.");
+}
+
+els.mainBtn.addEventListener('click', handleMainAction);
+
 document.getElementById('resetButton').addEventListener('click', () => {
-    if (timerId && confirm("¿Vas a rendirte? La disciplina se construye terminando lo que empiezas.")) {
+    if (timerId && confirm("¿Vas a rendirte? Quedará registrado.")) {
         clearInterval(timerId);
         timerId = null;
+        if (currentAmbient) { currentAmbient.pause(); currentAmbient.currentTime = 0; }
         document.getElementById('soundFail').play().catch(()=>{});
         saveEntry(els.goal.value + " (Rendido)", false);
+        resetInterface("Misión abortada.");
         timeLeft = totalTime;
         updateUI();
-        resetInterface("Misión abortada. El historial no olvida.");
     }
 });
 
 function resetInterface(msg) {
-    els.mainBtn.disabled = false;
+    els.mainBtn.innerText = "Ejecutar";
+    els.mainBtn.style.background = "var(--gold)";
+    els.timer.style.color = "#fff";
     els.goal.disabled = false;
-    els.goal.value = ""; 
+    els.goal.value = "";
     els.status.innerText = msg;
-    els.status.style.color = "var(--gold)";
 }
 
-els.mainBtn.addEventListener('click', start);
-
 document.getElementById('clearLog').addEventListener('click', () => {
-    if(confirm("¿Deseas borrar todo tu historial?")) {
-        localStorage.removeItem('absoluteLog');
-        location.reload();
-    }
+    if(confirm("¿Borrar todo el historial?")) { localStorage.clear(); location.reload(); }
 });
 
-// INICIO
 loadData();
 updateUI();
