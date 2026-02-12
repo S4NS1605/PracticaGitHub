@@ -1,25 +1,3 @@
-<<<<<<< HEAD
-const btn = document.getElementById("mainButton");
-const statusText = document.getElementById("status");
-const time = document.getElementById("time");
-
-btn.addEventListener("click", ()=>{
-
-    statusText.textContent = "Estado: Enfocado trabajando...";
-    statusText.style.color = "green";
-
-    btn.textContent = "En progreso";
-    btn.disabled = true;
-
-    mostrarHora();
-});
-
-/* función hora */
-function mostrarHora(){
-    const ahora = new Date();
-    time.textContent = "Inicio: " + ahora.toLocaleTimeString();
-}
-=======
 // CONFIGURACIÓN MAESTRA
 let totalTime = 25 * 60;
 let timeLeft = totalTime;
@@ -180,4 +158,3 @@ document.getElementById('clearLog').addEventListener('click', () => {
 // INICIALIZACIÓN
 loadData();
 updateUI();
->>>>>>> 147257ac82a30e02552ab2955d085bdcee776066
