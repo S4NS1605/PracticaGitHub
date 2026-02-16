@@ -12,7 +12,7 @@ body {
     margin: 0; padding: 20px; background: var(--bg); color: #fff;
     font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
 }
-
+/* esto es el container */
 .container { width: 100%; max-width: 400px; }
 
 .stats-bar {
