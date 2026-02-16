@@ -146,7 +146,7 @@ function startSession() {
         }
     }, 1000);
 }
-
+// esto es un comentario
 function togglePause() {
     isPaused = !isPaused;
     if (isPaused) {
