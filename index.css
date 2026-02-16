@@ -7,7 +7,7 @@
     --text-muted: #555;
     --white: #ffffff;
 }
-
+/* esto es del body */
 body {
     margin: 0; padding: 20px; background: var(--bg); color: #fff;
     font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
